@@ -28,7 +28,7 @@ import fr.qra.myProject.Service.UserService;
  *
  */
 @Controller
-@SessionAttributes(value = "user", types = { User.class })
+@SessionAttributes(value = "user")
 public class ScenariiController {
 
 	@Autowired
@@ -36,37 +36,31 @@ public class ScenariiController {
 
 	@Autowired
 	private ScenarioService scenarioService;
+	
+	/***		PUBLIC		***/
 
 	@RequestMapping(method = RequestMethod.GET, value = { "/boutique" })
-	public ModelAndView boutique(Locale locale, Model model, HttpSession session) {
+	public ModelAndView boutique(Locale locale, Model model) {
 
-		User user = (User) session.getAttribute("user");
-		if (user == null) {
-			user = new User();
-		}
-		
-		model.addAttribute("user", user);
 		model.addAttribute("scenario", new Scenario());
-		// for (Scenario s : scenarioService.listScenario() ) {
-		// int result=0;
-		// int nbVotant=0;
-		// for (UserHasScenario u : s.getListeUser() ){
-		// result+=u.getNoteUser();
-		// if (u.getNoteUser()!=-1) nbVotant++;
-		// }
-		// if (nbVotant!=0)
-		// s.setNote(result/nbVotant);
-		// scenarioService.updateScenario(s);
-		// }
 
 		List<Scenario> scenariiList = scenarioService.listScenario();
 		return new ModelAndView("boutique", "scenariiList", scenariiList);
 	}
+	
+	/***		FIN PUBLIC		***/
+	
+	/***		PRIVEE		***/
 
 	@RequestMapping(value = { "note", "/note" })
-	public String note(@ModelAttribute Scenario scenario, HttpSession session) {
+	public String note(@ModelAttribute Scenario scenario, HttpSession httpSession) {
 		System.out.println("note de l'utilisateur");
-		User user = (User) session.getAttribute("user");
+		
+		User user = (User) httpSession.getAttribute("user");
+		
+		if (user==null || user.getId()==0)
+			return "error/403";
+		
 		for (UserHasScenario uhs : user.getMesScenarii())
 			if (uhs.getScenario().getId() == scenario.getId()) {
 				uhs.setNoteUser(scenario.getNote());
@@ -89,4 +83,6 @@ public class ScenariiController {
 
 		return "redirect:/mesScenarii";
 	}
+	
+	/***		FIN PRIVEE		***/
 }

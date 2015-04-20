@@ -28,7 +28,6 @@ public class User implements Serializable {
 	 */
 	private static final long serialVersionUID = 368875986784459499L;
 
-	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id", unique = true, nullable = false)
 	private long id;
@@ -55,6 +54,7 @@ public class User implements Serializable {
 	@Transient
 	private String confirmPassword;
 
+	@Id
 	@Column
 	@NotNull
 	@Pattern(regexp = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$")

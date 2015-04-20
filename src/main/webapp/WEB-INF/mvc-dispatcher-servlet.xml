@@ -22,17 +22,16 @@
 	</bean>
 
 	<!-- DataSource -->
-	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource"
 		destroy-method="close">
-		<property name="driverClass" value="${database.driverClass}" />
-		<property name="jdbcUrl" value="${database.url}" />
-		<property name="user" value="${database.username}" />
+		<property name="driverClassName" value="${database.driverClass}" />
+		<property name="url" value="${database.url}" />
+		<property name="username" value="${database.username}" />
 		<property name="password" value="${database.password}" />
 
-		<property name="acquireIncrement" value="${connection.acquireIncrement}" />
-		<property name="minPoolSize" value="${connection.minPoolSize}" />
-		<property name="maxPoolSize" value="${connection.maxPoolSize}" />
-		<property name="maxIdleTime" value="${connection.maxIdleTime}" />
+		<property name="initialSize" value="${connection.initialSize}" />
+		<property name="maxIdle" value="${connection.maxIdle}" />
+		<property name="maxWaitMillis" value="${connection.maxWaitMillis}" />
 	</bean>
 
 	<!-- Hibernate SessionFactory -->

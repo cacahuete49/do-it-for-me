@@ -53,19 +53,14 @@ DROP TABLE IF EXISTS `user_has_scenario` ;
 
 CREATE TABLE IF NOT EXISTS `user_has_scenario` (
   `scenario_id` INT NOT NULL,
-  `user_id` INT NOT NULL,
+  `user_email` VARCHAR(50) NOT NULL,
   `date_achat` DATETIME NOT NULL,
   `prix_achat` FLOAT NOT NULL,
   `user_note` TINYINT(4) NOT NULL DEFAULT -1,
-  PRIMARY KEY (`scenario_id`, `user_id`),
-  INDEX `fk_scenario_has_user_user1_idx` (`user_id` ASC),
-  INDEX `fk_scenario_has_user_scenario_idx` (`scenario_id` ASC),
-  CONSTRAINT `fk_scenario_has_user_scenario`
-    FOREIGN KEY (`scenario_id`)
-    REFERENCES `scenario` (`id`)
-    ON UPDATE CASCADE,
-  CONSTRAINT `fk_scenario_has_user_user1`
-    FOREIGN KEY (`user_id`)
-    REFERENCES `user` (`id`)
-    ON UPDATE CASCADE)
+  PRIMARY KEY (`scenario_id`, `user_email`),
+  FOREIGN KEY (`scenario_id`)
+    REFERENCES `scenario` (`id`),
+  FOREIGN KEY (`user_email`)
+    REFERENCES `user` (`email`) ON DELETE CASCADE 
+  )
 ENGINE = InnoDB;

@@ -19,7 +19,7 @@
       <a href="admin">Administration dashboard</a><br>
    </c:if>
    <a href="editUser">Modifer mes coordonnées</a><br>
-   <a href="deleteUser">Détruire mon compte</a>
+   <a href="deleteUser" onclick="return confirm('Êtes-vous sûr de vouloir supprimer votre compte ?');">Détruire mon compte</a>
    </div>
    <%@ include file="../../bloc/footer.jsp"%>
 </body>

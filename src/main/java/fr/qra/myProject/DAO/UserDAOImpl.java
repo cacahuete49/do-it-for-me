@@ -33,31 +33,25 @@ public class UserDAOImpl implements UserDAO {
 	}
 
 	@Override
-	public User getUserByEmail(String email) throws NullPointerException{
-		Session session = sessionFactory.getCurrentSession();
-		Query query = session.createQuery("SELECT u FROM User u WHERE email = :email");
-		query.setParameter("email", email);
-		@SuppressWarnings("unchecked")
-		List<User> user = query.list();
-		return user.get(0);
-	}
-
-	@Override
-	public long addUser(User user) {
+	public String addUser(User user) {
 		Serializable id = sessionFactory.getCurrentSession().save(user);
-		return (Long) id;
+		return (String) id;
 	}
 
 	@Override
-	public void removeUser(long id) {
+	public void removeUser(String email) {
 		User user = new User();
-		user.setId(id);
+		user.setEmail(email);
 		sessionFactory.getCurrentSession().delete(user);
 	}
 
 	@Override
-	public User getUser(long id) {
-		return (User) sessionFactory.getCurrentSession().get(User.class, id);
+	public User getUser(String email) {
+//		return (User) sessionFactory.getCurrentSession().get(User.class, email);
+		Session session = sessionFactory.getCurrentSession();
+		Query query = session.createQuery("SELECT u FROM User u WHERE email= :email");
+		query.setParameter("email", email);
+		return (User) query.uniqueResult();
 	}
 
 	@Override

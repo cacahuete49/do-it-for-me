@@ -5,13 +5,13 @@
 <head>
 <title>Erreur 503</title>
 </head>
-<body style="height:100%">
+<body style="height:100%;margin-bottom:0px">
    <div class="container" style="height:100%;top:0px">
       <div class="row" style="height:10%">
-         <h1 class="text-center" style="height:100%">Erreur 503</h1>
+         <h1 class="text-center" style="height:100%">Erreur 503 - Service temporairement indisponible</h1>
       </div>
       <div class="row" style="height:90%">
-         <img class="img-responsive center-block" src="/myProject/resources/img/503.jpg" style="height:100%"/>
+         <img class="img-responsive center-block" src="/resources/img/503.jpg" style="height:100%"/>
       </div>
    </div>
 </body>

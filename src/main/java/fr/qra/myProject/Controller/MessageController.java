@@ -1,9 +1,9 @@
 package fr.qra.myProject.Controller;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
@@ -14,6 +14,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.ModelAndView;
 
 import fr.qra.myProject.Model.Message;
@@ -27,6 +28,7 @@ import fr.qra.myProject.Service.UserService;
  *
  */
 @Controller
+@SessionAttributes("user")
 public class MessageController {
 
 	@Autowired
@@ -35,9 +37,12 @@ public class MessageController {
 	@Autowired
 	private UserService userService;
 	
+	/***		PUBLIC		***/
+	
 	@RequestMapping( method = RequestMethod.GET,value = "/contact" )
-	public ModelAndView boutique(Locale locale, Model model, HttpSession session) {
+	public ModelAndView boutique(Locale locale, Model model, HttpSession session ,HttpServletRequest request) {
 		Message m = new Message();
+		m.setIp(request.getRemoteAddr());
 		User user = (User)session.getAttribute("user");
 		if (user==null) {
 			user = new User();
@@ -48,11 +53,12 @@ public class MessageController {
 	}
 	
 	@RequestMapping( method = RequestMethod.POST , value = {"addMessage"})
-	public String addMessage( @ModelAttribute("message") @Valid Message message, BindingResult result , Model model) {
+	public String addMessage( @ModelAttribute("message") @Valid Message message, BindingResult result , Model model ,HttpServletRequest request) {
 		if (result.hasErrors()){
 			return "contact";
 		}
 		message.setDateEnvoi(new Date());
+		message.setIp(request.getRemoteAddr());
 		messageService.addMessage(message);
 		
 		if (model.containsAttribute("user"))
@@ -62,20 +68,6 @@ public class MessageController {
 		return "merci";
 	}
 	
-	@RequestMapping( method = RequestMethod.GET,value = "/adminmessages" )
-	public ModelAndView allMessage(HttpSession httpSession){
-		ModelAndView model = new ModelAndView();
-		User user = userService.getUserByEmail(((User) httpSession.getAttribute("user"))
-				.getEmail());
-		if (!(user.getRole().equals("admin"))) {
-			model.setViewName("error/403");
-			return model;
-		}
-
-		List<Message> messages = messageService.listMessage();
-
-		model.addObject("messages", messages);
-		model.setViewName("admin/message");
-		return model;
-	}
+	
+	/***		FIN PUBLIC		***/
 }

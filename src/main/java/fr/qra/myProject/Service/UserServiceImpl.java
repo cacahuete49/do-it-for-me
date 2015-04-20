@@ -32,17 +32,13 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void removeUser(long id) {
-		userDAO.removeUser(id);
+	public void removeUser(String email) {
+		userDAO.removeUser(email);
 	}
 
 	@Override
-	public User getUser(long id) {
-		return userDAO.getUser(id);
+	public User getUser(String email) {
+		return userDAO.getUser(email);
 	}
 
-	@Override
-	public User getUserByEmail(String email) {
-		return userDAO.getUserByEmail(email);
-	}
 }

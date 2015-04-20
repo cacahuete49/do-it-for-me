@@ -39,7 +39,7 @@
                         </f:button>
                      </c:when>
                      <c:otherwise>
-                        <f:button type="submit" class="btn btn-lg btn-info" action="achat">
+                        <f:button type="submit" class="btn btn-lg btn-info" action="achat" onclick="return confirm('Confirmez-vous l\\'achat ?');">
                         Acheter <c:out value="${scenario.prix}" />&euro;
                         </f:button>
                      </c:otherwise>

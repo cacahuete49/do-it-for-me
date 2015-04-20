@@ -36,14 +36,16 @@ public class UserControllerTest extends EasyMockSupport {
 	public void testCreateUserOK() {
 		//setup
 		User user = new User();
+		user.setEmail("email");
 		user.setPassword("");
 		user.setConfirmPassword("");
 		userServiceMock.addUser(EasyMock.anyObject(User.class));
+		EasyMock.expect(userServiceMock.getUser(EasyMock.anyString())).andReturn(user);
 		
 		EasyMock.replay(userServiceMock);
 		
 		//when
-		ModelAndView resultat = userControllerUnderTest.createUser(user );
+		ModelAndView resultat = userControllerUnderTest.createUser(user);
 		
 		//verify
 		EasyMock.verify(userServiceMock);
@@ -77,7 +79,7 @@ public class UserControllerTest extends EasyMockSupport {
 		String mdpHash = new BCryptPasswordEncoder().encode(mdp);
 		userBDD.setPassword(mdpHash);
 		
-		EasyMock.expect(userServiceMock.getUserByEmail(EasyMock.anyString())).andReturn(userBDD);
+		EasyMock.expect(userServiceMock.getUser(EasyMock.anyString())).andReturn(userBDD);
 		
 		EasyMock.replay(userServiceMock);
 		//when
@@ -95,7 +97,7 @@ public class UserControllerTest extends EasyMockSupport {
 		User user = new User();
 		user.setEmail("email");
 		
-		EasyMock.expect(userServiceMock.getUserByEmail(EasyMock.anyString())).andThrow(new NullPointerException());
+		EasyMock.expect(userServiceMock.getUser(EasyMock.anyString())).andThrow(new NullPointerException());
 		
 		EasyMock.replay(userServiceMock);
 		//when
@@ -116,7 +118,7 @@ public class UserControllerTest extends EasyMockSupport {
 		User userBDD = new User();
 		userBDD.setPassword("fail");
 		
-		EasyMock.expect(userServiceMock.getUserByEmail(EasyMock.anyString())).andReturn(userBDD);
+		EasyMock.expect(userServiceMock.getUser(EasyMock.anyString())).andReturn(userBDD);
 		
 		EasyMock.replay(userServiceMock);
 		//when
@@ -133,11 +135,12 @@ public class UserControllerTest extends EasyMockSupport {
 		//setup
 		
 		User user = new User();
+		user.setId(1);
 		user.setPassword("test");
 		user.setConfirmPassword("test");
 		
 		User userBDD = new User();
-		EasyMock.expect(userServiceMock.getUser(EasyMock.anyLong())).andReturn(userBDD);
+		EasyMock.expect(userServiceMock.getUser(EasyMock.anyString())).andReturn(userBDD);
 		EasyMock.expect(userServiceMock.updateUser(EasyMock.anyObject(User.class))).andReturn(null);
 		
 		EasyMock.replay(userServiceMock);
@@ -154,6 +157,7 @@ public class UserControllerTest extends EasyMockSupport {
 	@Test
 	public void testEditUserBadPassword() {
 		User user = new User();
+		user.setId(1);
 		user.setPassword("test");
 		user.setConfirmPassword("fail");
 
@@ -173,12 +177,13 @@ public class UserControllerTest extends EasyMockSupport {
 		
 		User user = new User();
 		user.setEmail("email");
+		user.setId(1);
 		
 		
 		User userBDD = new User();
 		userBDD.setPassword("fail");
 		
-		EasyMock.expect(userServiceMock.getUserByEmail(EasyMock.anyString())).andReturn(userBDD);
+		EasyMock.expect(userServiceMock.getUser(EasyMock.anyString())).andReturn(userBDD);
 		EasyMock.expect(userServiceMock.updateUser(EasyMock.anyObject(User.class))).andReturn(userBDD);
 		EasyMock.expect(scenarioServiceMock.listScenario()).andReturn(new ArrayList<Scenario>());
 		EasyMock.expect(scenarioServiceMock.updateScenario(EasyMock.anyObject(Scenario.class))).andReturn(null);
@@ -203,13 +208,14 @@ public class UserControllerTest extends EasyMockSupport {
 		
 		User user = new User();
 		user.setEmail("email");
+		user.setId(1);
 		
 		
 		User userBDD = new User();
 		userBDD.setPassword("fail");
 		
 		EasyMock.expect(scenarioServiceMock.listScenario()).andReturn(new ArrayList<Scenario>());
-		EasyMock.expect(userServiceMock.getUserByEmail(EasyMock.anyString())).andReturn(userBDD);
+		EasyMock.expect(userServiceMock.getUser(EasyMock.anyString())).andReturn(userBDD);
 		EasyMock.expect(userServiceMock.updateUser(EasyMock.anyObject(User.class))).andThrow(new NonUniqueObjectException(userBDD, null));
 		
 		EasyMock.replay(userServiceMock,scenarioServiceMock);

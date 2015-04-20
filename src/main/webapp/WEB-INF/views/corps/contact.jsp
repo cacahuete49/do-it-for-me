@@ -28,6 +28,7 @@
          <f:input type="text" id="inputObjet" maxlength="50" path="objet" />
          <label for="inputMessage">Message</label>
          <f:textarea id="inputMessage" path="message"></f:textarea>
+         <label>Votre ip est "${message.ip}".</label>
          <button class="btn btn-lg btn-primary btn-block" type="submit" name="sendMessage">Envoyer</button>
       </f:form>
 

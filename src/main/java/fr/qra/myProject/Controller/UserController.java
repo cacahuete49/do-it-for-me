@@ -4,10 +4,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.hibernate.NonUniqueObjectException;
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -26,11 +26,26 @@ import fr.qra.myProject.Service.ScenarioService;
 import fr.qra.myProject.Service.UserService;
 
 @Controller
-@SessionAttributes(value = "userSession", types = { User.class })
+@SessionAttributes(value = "user", types = { User.class })
 public class UserController {
 
 	public final static String INCORRECT_PASSWORD = "Le mot de passe est incorrect";
 	public final static String INCORRECT_EMAIL = "L'email est incorrect";
+	
+	/**
+	 * Permet la visualisation de létat de l'user en session
+	 * @param session
+	 */
+	@ModelAttribute
+	public void showSession(HttpSession session){
+		System.out.println("UserController.showSession()");
+		User u = (User) session.getAttribute("user");
+	
+		if ( u!=null )
+			System.err.println("UserSession = "+u.toString());
+		else
+			System.err.println("UserSession = null");
+	}
 
 	@Autowired
 	private UserService userService;
@@ -38,17 +53,20 @@ public class UserController {
 	@Autowired
 	private ScenarioService scenarioService;
 
-	@ModelAttribute("user")
-	@RequestMapping(method = RequestMethod.GET, value = "/")
-	public ModelAndView home(Locale locale, Model model, HttpSession session) {
+	/***		PUBLIC		***/
+	
+	@RequestMapping(method = RequestMethod.GET, value = {"/","/accueil"})
+	public ModelAndView home(Locale locale, Model model) {
 		System.out.println("Welcome home!");
-		User user = (User) session.getAttribute("user");
-		if (user == null) {
+		ModelAndView view = new ModelAndView("home");
+		User user = null;
+		if (model.containsAttribute("user")) {
+			user = (User) model.asMap().get("user");
+		} else {
 			user = new User();
 		}
-		model.addAttribute("user", user);
-		System.out.println("user=" + user.toString());
-		return new ModelAndView("home", "user", user);
+		view.addObject("user", user);
+		return view;
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/inscription")
@@ -60,30 +78,8 @@ public class UserController {
 			model.addAttribute("user", new User());
 		return "inscription";
 	}
-
-	@RequestMapping(method = RequestMethod.GET, value = { "/editUser" })
-	public String modifierUser() {
-		return "privee/editUser";
-	}
-
-	@RequestMapping(method = RequestMethod.GET, value = { "/coordonnees" })
-	public String seeUser() {
-		return "privee/coordonnees";
-	}
-
-	@RequestMapping(value = { "mesScenarii" })
-	public ModelAndView mesScenarii(@ModelAttribute User user,
-			@ModelAttribute Scenario scenario, Model model) {
-		System.out.println("j'accede aux scenarii de l'user");
-		User userBDD = userService.getUserByEmail(user.getEmail());
-		ModelAndView modelAndView = new ModelAndView();
-		modelAndView.addObject("user", userBDD);
-		modelAndView.addObject("scenario", new Scenario());
-		modelAndView.setViewName("privee/listeScenarii");
-		return modelAndView;
-	}
-
-	@ModelAttribute("user")
+	
+	
 	@RequestMapping("createUser")
 	public ModelAndView createUser(@ModelAttribute User user){
 		System.out.println("je crée le user");
@@ -94,7 +90,7 @@ public class UserController {
 			user.setConfirmPassword(hashPassword);
 			try {
 				userService.addUser(user);
-			} catch (ConstraintViolationException e ) {
+			} catch (Exception e ) {
 				//email déja utilisé
 				ModelAndView model = new ModelAndView("inscription");
 				model.addObject("error", "Email déjà utilisé");
@@ -105,17 +101,19 @@ public class UserController {
 			model.addObject("error", INCORRECT_PASSWORD);
 			return model;
 		}
+		user = userService.getUser(user.getEmail());
 		return new ModelAndView("privee/coordonnees", "user", user);
 	}
 
-	@RequestMapping(value = { "connectUser" })
+	@RequestMapping(value = { "/connectUser", "connectUser" })
 	public ModelAndView connectUser(@ModelAttribute User user) {
 		System.out.println("je connect le user, " + user);
 		User userBDD = null;
 		// recup user via email
 		try {
-			userBDD = userService.getUserByEmail(user.getEmail());
-		} catch (NullPointerException e) {
+			userBDD = userService.getUser(user.getEmail());
+			if (userBDD == null) throw new NullPointerException("failed to find");
+		} catch (IndexOutOfBoundsException | NullPointerException e) {
 			ModelAndView model = new ModelAndView("home");
 			model.addObject("error", INCORRECT_EMAIL);
 			return model;
@@ -132,16 +130,54 @@ public class UserController {
 			return model;
 		}
 	}
+	
+	/***		FIN PUBLIC		***/
+	
+	/***		PRIVEE		***/
+	
+	@RequestMapping(method = RequestMethod.GET, value = { "/editUser" })
+	public String modifierUser(@ModelAttribute("user") User user) {
+		if (user==null || user.getId()==0)
+			return "error/403";
+		return "privee/editUser";
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = { "/coordonnees" })
+	public String seeUser(@ModelAttribute("user") User user) {
+		if (user==null || user.getId()==0)
+			return "error/403";
+		return "privee/coordonnees";
+	}
+
+	@RequestMapping(value = { "mesScenarii" })
+	public ModelAndView mesScenarii(@ModelAttribute("user") User user,
+			@ModelAttribute Scenario scenario) {
+		System.out.println("j'accede aux scenarii de l'user");
+		
+		if (user==null || user.getId()==0)
+			return new ModelAndView("error/403");
+		
+		User userBDD = userService.getUser(user.getEmail());
+		ModelAndView modelAndView = new ModelAndView();
+		modelAndView.addObject("user", userBDD);
+		modelAndView.addObject("scenario", new Scenario());
+		modelAndView.setViewName("privee/listeScenarii");
+		return modelAndView;
+	}
 
 	@RequestMapping(value = { "editUser" })
-	public ModelAndView editUser(@ModelAttribute User user) {
+	public ModelAndView editUser(@ModelAttribute("user") User user) {
 		System.out.println("UserController.editUser()");
+		
+		if (user==null || user.getId()==0)
+			return new ModelAndView("error/403");
+		
 		if (!user.getPassword().equals(user.getConfirmPassword())) {
 			ModelAndView model = new ModelAndView("privee/editUser");
 			model.addObject("error", INCORRECT_PASSWORD);
 			return model;
 		}
-		User userBDD = userService.getUser(user.getId());
+		User userBDD = userService.getUser(user.getEmail());
 		if (user.getEmail() == "")
 			user.setEmail(userBDD.getEmail());
 		if (user.getNom() == "")
@@ -159,8 +195,12 @@ public class UserController {
 	@RequestMapping("/deleteUser")
 	public ModelAndView deleteUser(@ModelAttribute User user, SessionStatus sessionStatus) {
 		System.out.println("UserController.deleteUser()");
+		
+		if (user==null || user.getId()==0)
+			return new ModelAndView("error/403");
+		
 		try {
-			userService.removeUser(user.getId());
+			userService.removeUser(user.getEmail());
 		} catch (Exception e) {
 			System.out.println("suppression de l'utilisateur failed");
 		} finally {
@@ -180,8 +220,12 @@ public class UserController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/achat")
-	public ModelAndView achat(@ModelAttribute Scenario scenario, @ModelAttribute User user) {
+	public ModelAndView achat(@ModelAttribute Scenario scenario, @ModelAttribute("user") User user) {
 		System.out.println("UserController.achat()");
+		
+		if (user==null || user.getId()==0)
+			return new ModelAndView("error/403");
+		
 		boolean estDejaPresent = false;
 		List<Scenario> scenarii = scenarioService.listScenario();
 		for (Scenario s : scenarii)
@@ -190,7 +234,7 @@ public class UserController {
 				break;
 			}
 //		scenario = scenarioService.getScenario(scenario.getId());
-		user = userService.getUserByEmail(user.getEmail());
+		user = userService.getUser(user.getEmail());
 		ModelAndView modelAndView = new ModelAndView();
 		// je vérifi si je possède déjà ce scenario
 		for (UserHasScenario s : user.getMesScenarii())
@@ -230,5 +274,7 @@ public class UserController {
 	public static String encodePasswordWithBCrypt(String plainPassword) {
 		return new BCryptPasswordEncoder().encode(plainPassword);
 	}
+	
+	/***		FIN PRIVEE		***/
 
 }

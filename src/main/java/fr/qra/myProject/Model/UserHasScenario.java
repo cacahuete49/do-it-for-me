@@ -25,7 +25,7 @@ import javax.persistence.Transient;
 @Table(name = "user_has_scenario")
 @AssociationOverrides({
 		@AssociationOverride(name = "userHasScenarioId.scenario", joinColumns = @JoinColumn(name = "scenario_id")),
-		@AssociationOverride(name = "userHasScenarioId.user", joinColumns = @JoinColumn(name = "user_id")) })
+		@AssociationOverride(name = "userHasScenarioId.user", joinColumns = @JoinColumn(name = "user_email")) })
 public class UserHasScenario implements Serializable {
 
 	/**
@@ -68,7 +68,7 @@ public class UserHasScenario implements Serializable {
 		userHasScenarioId.setScenario(scenario);
 	}
 
-	@Temporal(TemporalType.DATE)
+	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "date_achat", nullable = false, length = 10)
 	public Date getCreatedDate() {
 		return createdDate;

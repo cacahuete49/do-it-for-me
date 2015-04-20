@@ -40,6 +40,10 @@ public class Message implements Serializable {
 	@NotNull
 	@Size(min = 1, max = 1000)
 	private String message;
+	
+	@Column
+	@NotNull
+	private String ip;
 
 	@Column
 	@NotNull
@@ -83,5 +87,13 @@ public class Message implements Serializable {
 
 	public void setDateEnvoi(Date dateEnvoi) {
 		this.dateEnvoi = dateEnvoi;
+	}
+
+	public String getIp() {
+		return ip;
+	}
+
+	public void setIp(String ip) {
+		this.ip = ip;
 	}
 }
