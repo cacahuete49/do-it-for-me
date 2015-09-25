@@ -11,7 +11,7 @@
          <h1 class="text-center" style="height:100%">Erreur 404 - Ressource non trouvée</h1>
       </div>
       <div class="row" style="height:90%">
-         <img class="img-responsive center-block" src="/resources/img/404.jpg" style="height:100%"/>
+         <img class="img-responsive center-block" src="<c:url value='/resources/img/404.jpg'/>" style="height:100%"/>
       </div>
    </div>
 </body>

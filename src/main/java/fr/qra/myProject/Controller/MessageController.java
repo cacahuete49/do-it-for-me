@@ -57,14 +57,17 @@ public class MessageController {
 		if (result.hasErrors()){
 			return "contact";
 		}
+		
+		if (message.getMessage().length()==0 || message.getMessage().length()==0)
+			return "contact";
 		message.setDateEnvoi(new Date());
 		message.setIp(request.getRemoteAddr());
 		messageService.addMessage(message);
 		
-		if (model.containsAttribute("user"))
-			System.out.println("utilisateur déjà présent");
-		else
-			model.addAttribute("user", new User());
+//		if (model.containsAttribute("user"))
+//			System.out.println("utilisateur déjà présent");
+//		else
+//			model.addAttribute("user", new User());
 		return "merci";
 	}
 	

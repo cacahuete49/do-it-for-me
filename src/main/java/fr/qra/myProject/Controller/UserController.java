@@ -31,18 +31,20 @@ public class UserController {
 
 	public final static String INCORRECT_PASSWORD = "Le mot de passe est incorrect";
 	public final static String INCORRECT_EMAIL = "L'email est incorrect";
-	
+	public final static String INVALID_PASSWORD = "8 charactères alphanumériques minimum";
+
 	/**
 	 * Permet la visualisation de létat de l'user en session
+	 * 
 	 * @param session
 	 */
 	@ModelAttribute
-	public void showSession(HttpSession session){
+	public void showSession(HttpSession session) {
 		System.out.println("UserController.showSession()");
 		User u = (User) session.getAttribute("user");
-	
-		if ( u!=null )
-			System.err.println("UserSession = "+u.toString());
+
+		if (u != null)
+			System.err.println("UserSession = " + u.toString());
 		else
 			System.err.println("UserSession = null");
 	}
@@ -53,9 +55,9 @@ public class UserController {
 	@Autowired
 	private ScenarioService scenarioService;
 
-	/***		PUBLIC		***/
-	
-	@RequestMapping(method = RequestMethod.GET, value = {"/","/accueil"})
+	/*** PUBLIC ***/
+
+	@RequestMapping(method = RequestMethod.GET, value = { "/", "/accueil" })
 	public ModelAndView home(Locale locale, Model model) {
 		System.out.println("Welcome home!");
 		ModelAndView view = new ModelAndView("home");
@@ -78,30 +80,50 @@ public class UserController {
 			model.addAttribute("user", new User());
 		return "inscription";
 	}
-	
-	
+
+	private boolean isVerifyPassword(String password) {
+		return (password.matches("^[A-Za-z0-9]{8,}"));
+	}
+
+	private boolean isCorrectEmail(String password) {
+		return (password
+				.matches("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$"));
+	}
+
 	@RequestMapping("createUser")
-	public ModelAndView createUser(@ModelAttribute User user){
+	public ModelAndView createUser(@ModelAttribute User user) {
 		System.out.println("je crée le user");
-		//test du password
+		// test du password
+		if (!isCorrectEmail(user.getEmail())) {
+			ModelAndView model = new ModelAndView("inscription");
+			model.addObject("error_signin", INCORRECT_EMAIL);
+			return model;
+		}
+
 		if (user.getPassword().equals(user.getConfirmPassword())) {
+			if (!isVerifyPassword(user.getPassword())) {
+				ModelAndView model = new ModelAndView("inscription");
+				model.addObject("error_signin", INVALID_PASSWORD);
+				return model;
+			}
 			String hashPassword = encodePasswordWithBCrypt(user.getPassword());
 			user.setPassword(hashPassword);
 			user.setConfirmPassword(hashPassword);
 			try {
 				userService.addUser(user);
-			} catch (Exception e ) {
-				//email déja utilisé
+			} catch (Exception e) {
+				// email déja utilisé
 				ModelAndView model = new ModelAndView("inscription");
-				model.addObject("error", "Email déjà utilisé");
+				model.addObject("error_signin", "Email déjà utilisé");
 				return model;
 			}
 		} else {
 			ModelAndView model = new ModelAndView("inscription");
-			model.addObject("error", INCORRECT_PASSWORD);
+			model.addObject("error_signin", INCORRECT_PASSWORD);
 			return model;
 		}
 		user = userService.getUser(user.getEmail());
+		user.setPassword("");
 		return new ModelAndView("privee/coordonnees", "user", user);
 	}
 
@@ -112,7 +134,8 @@ public class UserController {
 		// recup user via email
 		try {
 			userBDD = userService.getUser(user.getEmail());
-			if (userBDD == null) throw new NullPointerException("failed to find");
+			if (userBDD == null)
+				throw new NullPointerException("failed to find");
 		} catch (IndexOutOfBoundsException | NullPointerException e) {
 			ModelAndView model = new ModelAndView("home");
 			model.addObject("error", INCORRECT_EMAIL);
@@ -120,8 +143,8 @@ public class UserController {
 		}
 
 		// test mdp
-		if (new BCryptPasswordEncoder()
-				.matches(user.getPassword(), userBDD.getPassword())) {
+		if (new BCryptPasswordEncoder().matches(user.getPassword(), userBDD.getPassword())) {
+			userBDD.setPassword("");
 			ModelAndView model = new ModelAndView("privee/coordonnees", "user", userBDD);
 			return model;
 		} else {
@@ -130,33 +153,32 @@ public class UserController {
 			return model;
 		}
 	}
-	
-	/***		FIN PUBLIC		***/
-	
-	/***		PRIVEE		***/
-	
+
+	/*** FIN PUBLIC ***/
+
+	/*** PRIVEE ***/
+
 	@RequestMapping(method = RequestMethod.GET, value = { "/editUser" })
 	public String modifierUser(@ModelAttribute("user") User user) {
-		if (user==null || user.getId()==0)
+		if (user == null || user.getId() == 0)
 			return "error/403";
 		return "privee/editUser";
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = { "/coordonnees" })
 	public String seeUser(@ModelAttribute("user") User user) {
-		if (user==null || user.getId()==0)
+		if (user == null || user.getId() == 0)
 			return "error/403";
 		return "privee/coordonnees";
 	}
 
 	@RequestMapping(value = { "mesScenarii" })
-	public ModelAndView mesScenarii(@ModelAttribute("user") User user,
-			@ModelAttribute Scenario scenario) {
+	public ModelAndView mesScenarii(@ModelAttribute("user") User user, @ModelAttribute Scenario scenario) {
 		System.out.println("j'accede aux scenarii de l'user");
-		
-		if (user==null || user.getId()==0)
+
+		if (user == null || user.getId() == 0)
 			return new ModelAndView("error/403");
-		
+
 		User userBDD = userService.getUser(user.getEmail());
 		ModelAndView modelAndView = new ModelAndView();
 		modelAndView.addObject("user", userBDD);
@@ -168,25 +190,32 @@ public class UserController {
 	@RequestMapping(value = { "editUser" })
 	public ModelAndView editUser(@ModelAttribute("user") User user) {
 		System.out.println("UserController.editUser()");
-		
-		if (user==null || user.getId()==0)
+
+		if (user == null || user.getId() == 0)
 			return new ModelAndView("error/403");
-		
-		if (!user.getPassword().equals(user.getConfirmPassword())) {
+
+		User userBDD = userService.getUser(user.getEmail());
+		if (user.getEmail().isEmpty()) {
+			user.setEmail(userBDD.getEmail());
+		} else if (!isCorrectEmail(user.getEmail())) {
+			ModelAndView model = new ModelAndView("privee/editUser");
+			model.addObject("error", INCORRECT_EMAIL);
+			return model;
+		}
+
+		if (user.getNom().isEmpty())
+			user.setNom(userBDD.getNom());
+		if (user.getPrenom().isEmpty())
+			user.setPrenom(userBDD.getPrenom());
+		if (user.getPassword().isEmpty()) {
+			user.setPassword(userBDD.getPassword());
+		} else if (!user.getPassword().equals(user.getConfirmPassword()) || !isVerifyPassword(user.getPassword())) {
 			ModelAndView model = new ModelAndView("privee/editUser");
 			model.addObject("error", INCORRECT_PASSWORD);
 			return model;
 		}
-		User userBDD = userService.getUser(user.getEmail());
-		if (user.getEmail() == "")
-			user.setEmail(userBDD.getEmail());
-		if (user.getNom() == "")
-			user.setNom(userBDD.getNom());
-		if (user.getPrenom() == "")
-			user.setPrenom(userBDD.getPrenom());
-		if (user.getPassword() == "")
-			user.setPassword(userBDD.getPassword());
 		user.setPassword(encodePasswordWithBCrypt(user.getPassword()));
+
 		userService.updateUser(user);
 		return new ModelAndView("privee/coordonnees");
 	}
@@ -195,10 +224,10 @@ public class UserController {
 	@RequestMapping("/deleteUser")
 	public ModelAndView deleteUser(@ModelAttribute User user, SessionStatus sessionStatus) {
 		System.out.println("UserController.deleteUser()");
-		
-		if (user==null || user.getId()==0)
+
+		if (user == null || user.getId() == 0)
 			return new ModelAndView("error/403");
-		
+
 		try {
 			userService.removeUser(user.getEmail());
 		} catch (Exception e) {
@@ -222,10 +251,10 @@ public class UserController {
 	@RequestMapping(method = RequestMethod.POST, value = "/achat")
 	public ModelAndView achat(@ModelAttribute Scenario scenario, @ModelAttribute("user") User user) {
 		System.out.println("UserController.achat()");
-		
-		if (user==null || user.getId()==0)
+
+		if (user == null || user.getId() == 0)
 			return new ModelAndView("error/403");
-		
+
 		boolean estDejaPresent = false;
 		List<Scenario> scenarii = scenarioService.listScenario();
 		for (Scenario s : scenarii)
@@ -233,7 +262,7 @@ public class UserController {
 				scenario = s;
 				break;
 			}
-//		scenario = scenarioService.getScenario(scenario.getId());
+		// scenario = scenarioService.getScenario(scenario.getId());
 		user = userService.getUser(user.getEmail());
 		ModelAndView modelAndView = new ModelAndView();
 		// je vérifi si je possède déjà ce scenario
@@ -274,7 +303,7 @@ public class UserController {
 	public static String encodePasswordWithBCrypt(String plainPassword) {
 		return new BCryptPasswordEncoder().encode(plainPassword);
 	}
-	
-	/***		FIN PRIVEE		***/
+
+	/*** FIN PRIVEE ***/
 
 }

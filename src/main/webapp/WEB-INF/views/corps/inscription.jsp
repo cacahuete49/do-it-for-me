@@ -15,8 +15,8 @@
 		<f:form class="form-signin" method="POST" modelAttribute="user"
 			action="createUser">
 			<h2 class="form-signin-heading">Enregistrez-vous</h2>
-			<c:if test="${ not empty error}">
-				<font color="red"><c:out value="${error}" /></font>
+			<c:if test="${ not empty error_signin}">
+				<font color="red"><c:out value="${error_signin}" /></font>
 			</c:if>
 			<label for="inputEmail">Adresse Email<font color="red">*</font></label>
 			<f:input type="email" id="inputEmail" class="form-control"

@@ -11,7 +11,7 @@
          <h1 class="text-center" style="height:100%">Erreur 503 - Service temporairement indisponible</h1>
       </div>
       <div class="row" style="height:90%">
-         <img class="img-responsive center-block" src="/resources/img/503.jpg" style="height:100%"/>
+         <img class="img-responsive center-block" src="<c:url value='/resources/img/503.jpg' />" style="height:100%"/>
       </div>
    </div>
 </body>

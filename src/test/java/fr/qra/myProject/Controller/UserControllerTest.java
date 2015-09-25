@@ -36,9 +36,9 @@ public class UserControllerTest extends EasyMockSupport {
 	public void testCreateUserOK() {
 		//setup
 		User user = new User();
-		user.setEmail("email");
-		user.setPassword("");
-		user.setConfirmPassword("");
+		user.setEmail("email@email.com");
+		user.setPassword("azertyuiop");
+		user.setConfirmPassword("azertyuiop");
 		userServiceMock.addUser(EasyMock.anyObject(User.class));
 		EasyMock.expect(userServiceMock.getUser(EasyMock.anyString())).andReturn(user);
 		
@@ -57,15 +57,16 @@ public class UserControllerTest extends EasyMockSupport {
 	public void testCreateUserKO() {
 		//setup
 		User user = new User();
-		user.setPassword("");
-		user.setConfirmPassword("1");
+		user.setEmail("email@email.com");
+		user.setPassword("azertyuiop");
+		user.setConfirmPassword("poiuytreza");
 		
 		//when
 		ModelAndView resultat = userControllerUnderTest.createUser(user);
 		
 		//verify
 		assertEquals(resultat.getViewName(),"inscription");
-		assertEquals(resultat.getModelMap().get("error"),UserController.INCORRECT_PASSWORD);
+		assertEquals(resultat.getModelMap().get("error_signin"),UserController.INCORRECT_PASSWORD);
 	}
 	
 	@Test
@@ -134,14 +135,13 @@ public class UserControllerTest extends EasyMockSupport {
 	public void testEditUserOK() {
 		//setup
 		
-		User user = new User();
-		user.setId(1);
-		user.setPassword("test");
-		user.setConfirmPassword("test");
+		User user = new User(1,"nom","prenom","test@test.com","user",null);
+		user.setPassword("testtest");
+		user.setConfirmPassword("testtest");
 		
 		User userBDD = new User();
 		EasyMock.expect(userServiceMock.getUser(EasyMock.anyString())).andReturn(userBDD);
-		EasyMock.expect(userServiceMock.updateUser(EasyMock.anyObject(User.class))).andReturn(null);
+		EasyMock.expect(userServiceMock.updateUser(user)).andReturn(null);
 		
 		EasyMock.replay(userServiceMock);
 		
@@ -156,10 +156,9 @@ public class UserControllerTest extends EasyMockSupport {
 
 	@Test
 	public void testEditUserBadPassword() {
-		User user = new User();
-		user.setId(1);
-		user.setPassword("test");
-		user.setConfirmPassword("fail");
+		User user = new User(1,"nom","prenom","test@test.com","user",null);
+		user.setPassword("testtest");
+		user.setConfirmPassword("failfail");
 
 		ModelAndView resultat = userControllerUnderTest.editUser(user);
 		
