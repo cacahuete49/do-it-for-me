@@ -34,7 +34,12 @@
 		<location>/WEB-INF/views/corps/error/403.jsp</location>
 	</error-page>
 	<display-name>FirstSpring</display-name>
-	
+
+	<context-param>
+		<param-name>defaultHtmlEscape</param-name>
+		<param-value>true</param-value>
+	</context-param>
+
 	<filter>
 		<filter-name>SetCharacterEncodingFilter</filter-name>
 		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
@@ -51,5 +56,5 @@
 		<filter-name>SetCharacterEncodingFilter</filter-name>
 		<url-pattern>*</url-pattern>
 	</filter-mapping>
-	
+
 </web-app>

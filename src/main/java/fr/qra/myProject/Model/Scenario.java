@@ -91,4 +91,8 @@ public class Scenario implements Serializable {
 	public void setListeUser(List<UserHasScenario> listeUser) {
 		this.listeUser = listeUser;
 	}
+	
+	public String toString(){
+		return this.id+";"+this.getDescription()+";"+this.getNote()+";"+this.getNbTelechargement()+";"+this.getPrix()+"|";
+	}
 }

@@ -11,10 +11,10 @@
    <%@ include file="../../bloc/header.jsp"%>
    <div class="container marketing">
    <h2>Coordonnées</h2>
-   Email: ${user.email}<br>
-   Nom: ${user.nom}<br>
-   Prénom: ${user.prenom}<br>
-   Nombre de scénarii: ${fn:length(user.mesScenarii)}<br>
+   Email: <c:out value="${user.email}"/><br>
+   Nom: <c:out value="${user.nom}"/><br>
+   Prénom: <c:out value="${user.prenom}" /><br>
+   Nombre de scénarii: <c:out value="${fn:length(user.mesScenarii)}"/><br>
    <c:if test="${user.role eq 'admin'}">
       <a href="admin">Administration dashboard</a><br>
    </c:if>

@@ -140,7 +140,7 @@ public class UserControllerTest extends EasyMockSupport {
 		user.setConfirmPassword("testtest");
 		
 		User userBDD = new User();
-		EasyMock.expect(userServiceMock.getUser(EasyMock.anyString())).andReturn(userBDD);
+		EasyMock.expect(userServiceMock.getUserById(EasyMock.anyLong())).andReturn(userBDD);
 		EasyMock.expect(userServiceMock.updateUser(user)).andReturn(null);
 		
 		EasyMock.replay(userServiceMock);
@@ -159,8 +159,14 @@ public class UserControllerTest extends EasyMockSupport {
 		User user = new User(1,"nom","prenom","test@test.com","user",null);
 		user.setPassword("testtest");
 		user.setConfirmPassword("failfail");
-
+		
+		EasyMock.expect(userServiceMock.getUserById(EasyMock.anyLong())).andReturn(user);
+		
+		EasyMock.replay(userServiceMock);
+		
 		ModelAndView resultat = userControllerUnderTest.editUser(user);
+		
+		EasyMock.verify(userServiceMock);
 		
 		assertEquals(resultat.getViewName(),"privee/editUser");
 		assertEquals(resultat.getModelMap().get("error"),UserController.INCORRECT_PASSWORD);

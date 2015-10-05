@@ -92,6 +92,9 @@ public class UserController {
 
 	@RequestMapping("createUser")
 	public ModelAndView createUser(@ModelAttribute User user) {
+//		if (user!=null && user.getId()==0)
+//			return new ModelAndView("error/403");
+				
 		System.out.println("je crée le user");
 		// test du password
 		if (!isCorrectEmail(user.getEmail())) {
@@ -190,11 +193,14 @@ public class UserController {
 	@RequestMapping(value = { "editUser" })
 	public ModelAndView editUser(@ModelAttribute("user") User user) {
 		System.out.println("UserController.editUser()");
-
+		User userBDD = null;
+		// si le user n'est pas connecté
 		if (user == null || user.getId() == 0)
 			return new ModelAndView("error/403");
-
-		User userBDD = userService.getUser(user.getEmail());
+		// si le user est connecté sans être en base
+		else if ((userBDD = userService.getUserById(user.getId())) == null)
+			return new ModelAndView("error/403");
+		
 		if (user.getEmail().isEmpty()) {
 			user.setEmail(userBDD.getEmail());
 		} else if (!isCorrectEmail(user.getEmail())) {
@@ -213,10 +219,12 @@ public class UserController {
 			ModelAndView model = new ModelAndView("privee/editUser");
 			model.addObject("error", INCORRECT_PASSWORD);
 			return model;
+		} else {
+			user.setPassword(encodePasswordWithBCrypt(user.getPassword()));
 		}
-		user.setPassword(encodePasswordWithBCrypt(user.getPassword()));
-
+		
 		userService.updateUser(user);
+		user.setPassword("");
 		return new ModelAndView("privee/coordonnees");
 	}
 

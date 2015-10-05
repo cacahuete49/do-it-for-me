@@ -53,6 +53,14 @@ public class UserDAOImpl implements UserDAO {
 		query.setParameter("email", email);
 		return (User) query.uniqueResult();
 	}
+	
+	@Override
+	public User getUserById(long id) {
+		Session session = sessionFactory.getCurrentSession();
+		Query query = session.createQuery("SELECT u FROM User u WHERE id= :id");
+		query.setParameter("id", id);
+		return (User) query.uniqueResult();
+	}
 
 	@Override
 	public User updateUser(User user) {

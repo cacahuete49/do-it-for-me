@@ -14,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -36,8 +37,8 @@ public class ScenariiController {
 
 	@Autowired
 	private ScenarioService scenarioService;
-	
-	/***		PUBLIC		***/
+
+	/*** PUBLIC ***/
 
 	@RequestMapping(method = RequestMethod.GET, value = { "/boutique" })
 	public ModelAndView boutique(Locale locale, Model model) {
@@ -47,20 +48,29 @@ public class ScenariiController {
 		List<Scenario> scenariiList = scenarioService.listScenario();
 		return new ModelAndView("boutique", "scenariiList", scenariiList);
 	}
-	
-	/***		FIN PUBLIC		***/
-	
-	/***		PRIVEE		***/
+
+	@RequestMapping(method = RequestMethod.GET, value = { "/data/boutique" },produces = "application/json; charset=ISO-8859-1")
+	public @ResponseBody String dataBoutique() {
+		String data = "";
+		List<Scenario> scenariiList = scenarioService.listScenario();
+		for (Scenario s : scenariiList)
+			data += s.toString();
+		return data;
+	}
+
+	/*** FIN PUBLIC ***/
+
+	/*** PRIVEE ***/
 
 	@RequestMapping(value = { "note", "/note" })
 	public String note(@ModelAttribute Scenario scenario, HttpSession httpSession) {
 		System.out.println("note de l'utilisateur");
-		
+
 		User user = (User) httpSession.getAttribute("user");
-		
-		if (user==null || user.getId()==0)
+
+		if (user == null || user.getId() == 0)
 			return "error/403";
-		
+
 		for (UserHasScenario uhs : user.getMesScenarii())
 			if (uhs.getScenario().getId() == scenario.getId()) {
 				uhs.setNoteUser(scenario.getNote());
@@ -83,6 +93,6 @@ public class ScenariiController {
 
 		return "redirect:/mesScenarii";
 	}
-	
-	/***		FIN PRIVEE		***/
+
+	/*** FIN PRIVEE ***/
 }

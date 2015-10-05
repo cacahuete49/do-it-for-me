@@ -40,7 +40,7 @@ public class MessageController {
 	/***		PUBLIC		***/
 	
 	@RequestMapping( method = RequestMethod.GET,value = "/contact" )
-	public ModelAndView boutique(Locale locale, Model model, HttpSession session ,HttpServletRequest request) {
+	public ModelAndView contact(Locale locale, Model model, HttpSession session ,HttpServletRequest request) {
 		Message m = new Message();
 		m.setIp(request.getRemoteAddr());
 		User user = (User)session.getAttribute("user");
@@ -57,11 +57,14 @@ public class MessageController {
 		if (result.hasErrors()){
 			return "contact";
 		}
-		
-		if (message.getMessage().length()==0 || message.getMessage().length()==0)
-			return "contact";
-		message.setDateEnvoi(new Date());
+
 		message.setIp(request.getRemoteAddr());
+		if (message.getObjet().length()==0 || message.getMessage().length()==0){
+			model.addAttribute("message",message);
+			return "contact";
+		}
+		message.setDateEnvoi(new Date());
+		
 		messageService.addMessage(message);
 		
 //		if (model.containsAttribute("user"))

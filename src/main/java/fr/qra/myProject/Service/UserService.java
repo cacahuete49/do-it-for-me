@@ -15,4 +15,6 @@ public interface UserService {
 	public User getUser(String email);
 
 	public User updateUser(User user);
+
+	public User getUserById(long l);
 }
