@@ -1,5 +1,7 @@
-target/
+target/**
 *.class
 *.war
 *.jar
 *.swp
+
+**/.*
