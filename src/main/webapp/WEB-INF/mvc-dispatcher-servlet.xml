@@ -34,9 +34,9 @@
 		<property name="username" value="${database.username}" />
 		<property name="password" value="${database.password}" />
 
-		<property name="initialSize" value="${connection.initialSize}" />
-		<property name="maxIdle" value="${connection.maxIdle}" />
-		<property name="maxWaitMillis" value="${connection.maxWaitMillis}" />
+		<property name="initialSize" value="${connexion.initialSize}" />
+		<property name="maxIdle" value="${connexion.maxIdle}" />
+		<property name="maxWaitMillis" value="${connexion.maxWaitMillis}" />
 	</bean>
 
 	<!-- Hibernate SessionFactory -->
